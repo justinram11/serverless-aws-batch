@@ -2,7 +2,8 @@
 
 const BbPromise = require('bluebird');
 const fse = require('fs-extra');
-var util = require('util')
+const { buildAndUploadImage } = require('./lib/docker');
+var util = require('util');
 
 BbPromise.promisifyAll(fse);
 
@@ -17,7 +18,9 @@ class ServerlessAWSBatch {
                 this.serverless.cli.log(util.inspect(this.options));
                 this.serverless.cli.log(util.inspect(this.serverless.service))
             },
-            'after:package:finalize': () => {
+            'after:package:createDeploymentArtifacts': () => {
+                this.serverless.cli.log("Creating docker image...");
+                buildAndUploadImage(this.serverless, this.options);
             }
         }
     }
