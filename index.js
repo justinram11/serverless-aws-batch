@@ -5,7 +5,8 @@ const fse = require('fs-extra');
 const generateCoreTemplate = require('./lib/generateCoreTemplate');
 const ecr = require('./lib/ecr');
 const docker = require('./lib/docker');
-const batch = require('./lib/batch');
+const batchenvironment = require('./lib/batchenvironment');
+const batchtask = require('./lib/batchtask');
 const _ = require('lodash');
 var util = require('util');
 
@@ -25,10 +26,10 @@ class ServerlessAWSBatch {
         'getECRRepositoryName': ecr.getECRRepositoryName,
         'getECRRepositoryURL': ecr.getECRRepositoryURL,
         'getDockerImageName': docker.getDockerImageName,
-        'getBatchServiceRoleLogicalId': batch.getBatchServiceRoleLogicalId,
-        'getBatchInstanceManagementRoleLogicalId': batch.getBatchInstanceManagementRoleLogicalId,
-        'getBatchComputeEnvironmentLogicalId': batch.getBatchComputeEnvironmentLogicalId,
-        'getBatchJobQueueLogicalId': batch.getBatchJobQueueLogicalId
+        'getBatchServiceRoleLogicalId': batchenvironment.getBatchServiceRoleLogicalId,
+        'getBatchInstanceManagementRoleLogicalId': batchenvironment.getBatchInstanceManagementRoleLogicalId,
+        'getBatchComputeEnvironmentLogicalId': batchenvironment.getBatchComputeEnvironmentLogicalId,
+        'getBatchJobQueueLogicalId': batchenvironment.getBatchJobQueueLogicalId
       }
     );
 
@@ -39,15 +40,18 @@ class ServerlessAWSBatch {
       /**
        * Outer lifecycle hooks
        */
-      'after:package:initialize': () => BbPromise.bind(this)
-        .then(generateCoreTemplate.generateCoreTemplate),
+      //'after:package:initialize': () => BbPromise.bind(this)
+        //.then(generateCoreTemplate.generateCoreTemplate),
+
+      'before:package:compileFunctions': () => BbPromise.bind(this)
+        .then(batchtask.compileBatchTasks)
 
       //'after:package:createDeploymentArtifacts': () => BbPromise.bind(this)
       //  .then(docker.buildDockerImage),
 
-      'before:deploy:deploy': () => BbPromise.bind(this)
-        .then(batch.validateAWSBatchServerlessConfig)
-        .then(batch.generateAWSBatchTemplate)
+      //'before:deploy:deploy': () => BbPromise.bind(this)
+        //.then(batchenvironment.validateAWSBatchServerlessConfig)
+        //.then(batchenvironment.generateAWSBatchTemplate)
         //.then(docker.pushDockerImageToECR)
     }
   }
