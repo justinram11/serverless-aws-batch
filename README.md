@@ -12,10 +12,15 @@ Tested with:
 
 ## Install
 ```
-sls plugin install -n serverless-batch
+npm install serverless-aws-batch --save-dev
 ```
 
-This will automatically add the plugin to your project’s `package.json` and plugin section of `serverless.yml`. 
+Then modify the `serverless.yml` file to include the plugin:
+
+```yaml
+plugins:
+  - serverless-aws-batch
+```
 
 Next we need to define our [AWS Batch Compute Resource](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-batch-computeenvironment-computeresources.html)
 
@@ -317,7 +322,7 @@ s3 = boto3.client('s3')
 def hello(event, context):
     logger.info(f"Hello world: {event}")
 
-    response = client.list_buckets()
+    response = s3.list_buckets()
     logger.info(f"S3 Buckets: {response}")
 
 ```
