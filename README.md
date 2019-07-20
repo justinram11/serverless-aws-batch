@@ -11,11 +11,15 @@ Tested with:
 **Disclaimer: This project has not yet been well tested and is not yet recommended for a production system**
 
 ## Install
+First make sure than you have Docker installed and running
+
+Then add the plugin to your serverless project:
+
 ```
 npm install serverless-aws-batch --save-dev
 ```
 
-Then modify the `serverless.yml` file to include the plugin:
+Modify the `serverless.yml` file to include the plugin:
 
 ```yaml
 plugins:
