@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project version="4">
-  <component name="ProjectModuleManager">
-    <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/serverless-aws-batch.iml" filepath="$PROJECT_DIR$/.idea/serverless-aws-batch.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../serverless-aws-batch-demo-project/.idea/tmp.iml" filepath="$PROJECT_DIR$/../serverless-aws-batch-demo-project/.idea/tmp.iml" />
-    </modules>
-  </component>
-</project>
