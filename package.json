@@ -27,7 +27,7 @@
     "cross-spawn": "^6.0.5",
     "fs-extra": "^7.0.1",
     "jszip": "^3.2.1",
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.13",
     "serverless": "^1.42.3"
   },
   "devDependencies": {
