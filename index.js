@@ -7,8 +7,8 @@ const ecr = require('./lib/ecr');
 const docker = require('./lib/docker');
 const batchenvironment = require('./lib/batchenvironment');
 const batchtask = require('./lib/batchtask');
+const awscli = require('./lib/awscli');
 const _ = require('lodash');
-var util = require('util');
 
 BbPromise.promisifyAll(fse);
 
@@ -28,8 +28,14 @@ class ServerlessAWSBatch {
         'getDockerImageName': docker.getDockerImageName,
         'getBatchServiceRoleLogicalId': batchenvironment.getBatchServiceRoleLogicalId,
         'getBatchInstanceManagementRoleLogicalId': batchenvironment.getBatchInstanceManagementRoleLogicalId,
+        'getBatchInstanceManagementProfileLogicalId': batchenvironment.getBatchInstanceManagementProfileLogicalId,
+        'getBatchSpotFleetManagementRoleLogicalId': batchenvironment.getBatchSpotFleetManagementRoleLogicalId,
+        'getBatchJobExecutionRoleLogicalId': batchenvironment.getBatchJobExecutionRoleLogicalId,
+        'getLambdaScheduleExecutionRoleLogicalId': batchenvironment.getLambdaScheduleExecutionRoleLogicalId,
         'getBatchComputeEnvironmentLogicalId': batchenvironment.getBatchComputeEnvironmentLogicalId,
-        'getBatchJobQueueLogicalId': batchenvironment.getBatchJobQueueLogicalId
+        'getBatchJobQueueLogicalId': batchenvironment.getBatchJobQueueLogicalId,
+        'getBatchJobQueueName': batchenvironment.getBatchJobQueueName,
+        'getJobDefinitionLogicalId': batchtask.getJobDefinitionLogicalId
       }
     );
 
@@ -37,22 +43,22 @@ class ServerlessAWSBatch {
     this.commands = {}
 
     this.hooks = {
-      /**
-       * Outer lifecycle hooks
-       */
-      //'after:package:initialize': () => BbPromise.bind(this)
-        //.then(generateCoreTemplate.generateCoreTemplate),
+      'after:package:initialize': () => BbPromise.bind(this)
+        .then(generateCoreTemplate.generateCoreTemplate),
 
       'before:package:compileFunctions': () => BbPromise.bind(this)
-        .then(batchtask.compileBatchTasks)
+        .then(batchenvironment.validateAWSBatchServerlessConfig)
+        .then(batchenvironment.generateAWSBatchTemplate)
+        .then(batchtask.compileBatchTasks),
 
-      //'after:package:createDeploymentArtifacts': () => BbPromise.bind(this)
-      //  .then(docker.buildDockerImage),
+      'after:package:createDeploymentArtifacts': () => BbPromise.bind(this)
+        .then(docker.buildDockerImage),
 
-      //'before:deploy:deploy': () => BbPromise.bind(this)
-        //.then(batchenvironment.validateAWSBatchServerlessConfig)
-        //.then(batchenvironment.generateAWSBatchTemplate)
-        //.then(docker.pushDockerImageToECR)
+      'before:aws:deploy:deploy:uploadArtifacts': () => BbPromise.bind(this)
+        .then(docker.pushDockerImageToECR),
+
+      'before:remove:remove': () => BbPromise.bind(this)
+        .then(awscli.deleteAllDockerImagesInECR)
     }
   }
 }
