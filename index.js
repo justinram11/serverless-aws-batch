@@ -30,7 +30,7 @@ class ServerlessAWSBatch {
         'getBatchInstanceManagementRoleLogicalId': batchenvironment.getBatchInstanceManagementRoleLogicalId,
         'getBatchInstanceManagementProfileLogicalId': batchenvironment.getBatchInstanceManagementProfileLogicalId,
         'getBatchSpotFleetManagementRoleLogicalId': batchenvironment.getBatchSpotFleetManagementRoleLogicalId,
-        'getBatchJobExecutionRoleLogicalId': batchenvironment.getBatchJobExecutionRoleLogicalId,
+        'getBatchJobExecutionRoleLogicalId': batchtask.getBatchJobExecutionRoleLogicalId,
         'getLambdaScheduleExecutionRoleLogicalId': batchenvironment.getLambdaScheduleExecutionRoleLogicalId,
         'getBatchComputeEnvironmentLogicalId': batchenvironment.getBatchComputeEnvironmentLogicalId,
         'getBatchJobQueueLogicalId': batchenvironment.getBatchJobQueueLogicalId,
