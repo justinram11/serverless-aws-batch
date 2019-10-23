@@ -352,3 +352,7 @@ module.exports.hello = (event, context, callback) => {
   });
 };
 ```
+
+## Contributors
+
+* [simonobe](https://github.com/simonobe)
