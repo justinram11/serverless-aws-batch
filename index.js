@@ -51,10 +51,10 @@ class ServerlessAWSBatch {
         .then(batchenvironment.generateAWSBatchTemplate)
         .then(batchtask.compileBatchTasks),
 
-      'after:aws:deploy:deploy:updateStack': () => BbPromise.bind(this)
+      'after:package:createDeploymentArtifacts': () => BbPromise.bind(this)
         .then(docker.buildDockerImage),
 
-      'after:aws:deploy:finalize:cleanup': () => BbPromise.bind(this)
+      'before:aws:deploy:deploy:uploadArtifacts': () => BbPromise.bind(this)
         .then(docker.pushDockerImageToECR),
 
       'before:remove:remove': () => BbPromise.bind(this)
