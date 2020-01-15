@@ -6,4 +6,3 @@ export AWS_SECRET_ACCESS_KEY=$(echo $credentials | jq -r .SecretAccessKey)
 export AWS_SESSION_TOKEN=$(echo $credentials | jq -r .SessionToken)
 echo ${AWS_ACCESS_KEY_ID}
 
-/var/lang/bin/python3.6 /var/runtime/awslambda/bootstrap.py $1
