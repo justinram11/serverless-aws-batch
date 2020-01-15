@@ -1,9 +1,9 @@
 #!/bin/bash
 
-credentials=$(aws sts assume-role --role-arn $ASSUME_ROLE_ARN --role-session-name "RoleSessionFromCodeBuild" | jq .Credentials)
-export AWS_ACCESS_KEY_ID=$(echo $credentials | jq -r .AccessKeyId)
-export AWS_SECRET_ACCESS_KEY=$(echo $credentials | jq -r .SecretAccessKey)
-export AWS_SESSION_TOKEN=$(echo $credentials | jq -r .SessionToken)
+echo $2
+export AWS_ACCESS_KEY_ID=$(echo $2 | jq -r .event.AWS_ACCESS_KEY_ID)
+export AWS_SECRET_ACCESS_KEY=$(echo $2 | jq -r .event.AWS_SECRET_ACCESS_KEY)
+export AWS_SESSION_TOKEN=$(echo $2 | jq -r .event.AWS_SESSION_TOKEN)
 echo ${AWS_ACCESS_KEY_ID}
 
 /var/lang/bin/python3.6 /var/runtime/awslambda/bootstrap.py $1
