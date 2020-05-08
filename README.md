@@ -134,7 +134,7 @@ service: serverless-demo
 provider:
   name: aws
   region: us-east-2
-  runtime: python3.7
+  runtime: python3.7 | nodejs12.x # TODO Select one
   # Creates a SPOT Compute Environment using the VPC defined in our Resources
   batch:
     Type: SPOT
@@ -153,7 +153,8 @@ provider:
       Resource: "*"
 
 plugins:
-  - serverless-python-requirements
+  # TODO Required if a python project
+  # - serverless-python-requirements
   - serverless-aws-batch
 
 package:
