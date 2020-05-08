@@ -356,3 +356,4 @@ module.exports.hello = (event, context, callback) => {
 ## Contributors
 
 * [simonobe](https://github.com/simonobe)
+* [gcaliene](https://github.com/gcaliene)

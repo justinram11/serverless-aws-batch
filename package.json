@@ -23,14 +23,14 @@
   },
   "homepage": "https://github.com/justinram11/serverless-aws-batch#readme",
   "dependencies": {
-    "bluebird": "^3.5.3",
+    "bluebird": "^3.7.2",
     "cross-spawn": "^6.0.5",
     "fs-extra": "^7.0.1",
-    "jszip": "^3.2.1",
+    "jszip": "^3.4.0",
     "lodash": "^4.17.13",
-    "serverless": "^1.42.3"
+    "serverless": "^1.70.0"
   },
   "devDependencies": {
-    "aws-sdk": "^2.471.0"
+    "aws-sdk": "^2.672.0"
   }
 }
