@@ -358,3 +358,4 @@ module.exports.hello = (event, context, callback) => {
 
 * [simonobe](https://github.com/simonobe)
 * [gcaliene](https://github.com/gcaliene)
+* [MEGApixel23](https://github.com/MEGApixel23)
