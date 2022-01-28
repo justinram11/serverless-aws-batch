@@ -1,0 +1,128 @@
+Resources:
+
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      InstanceTenancy: default
+      Tags:
+        -
+          Key: Name
+          Value: serverless-aws-batch-e2e-test
+
+  # Private subnet A
+
+  SubnetAPrivate:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select [0, !GetAZs '']
+      CidrBlock: 10.0.16.0/20
+      VpcId: !Ref VPC
+      Tags:
+        -
+          Key: Name
+          Value: serverless-aws-batch-e2e-test private A
+
+  RouteTableAPrivate:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        -
+          Key: Name
+          Value: serverless-aws-batch-e2e-test private A
+
+  RouteTableAssociationAPrivate:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref SubnetAPrivate
+      RouteTableId: !Ref RouteTableAPrivate
+
+  ######
+
+  # Private subnet Z
+
+  SubnetZPrivate:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select [1, !GetAZs '']
+      CidrBlock: 10.0.48.0/20
+      VpcId: !Ref VPC
+      Tags:
+        -
+          Key: Name
+          Value: serverless-aws-batch-e2e-test private Z
+
+  RouteTableZPrivate:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        -
+          Key: Name
+          Value: serverless-aws-batch-e2e-test private Z
+
+  RouteTableAssociationZPrivate:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref SubnetZPrivate
+      RouteTableId: !Ref RouteTableZPrivate
+
+  ######
+
+  # Network ACL for private subnets
+
+  NetworkAclPrivate:
+    Type: AWS::EC2::NetworkAcl
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        -
+          Key: Name
+          Value: serverless-aws-batch-e2e-test private subnets network ACL
+
+  SubnetNetworkAclAssociationAPrivate:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId: !Ref SubnetAPrivate
+      NetworkAclId: !Ref NetworkAclPrivate
+
+  SubnetNetworkAclAssociationZPrivate:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId: !Ref SubnetZPrivate
+      NetworkAclId: !Ref NetworkAclPrivate
+
+  AllowAllVPCTrafficIn:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      NetworkAclId: !Ref NetworkAclPrivate
+      RuleNumber: 99
+      Protocol: -1
+      RuleAction: allow
+      Egress: false
+      CidrBlock: 0.0.0.0/0
+
+  AllowAllVPCTrafficOut:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      NetworkAclId: !Ref NetworkAclPrivate
+      RuleNumber: 99
+      Protocol: -1
+      RuleAction: allow
+      Egress: true
+      CidrBlock: 0.0.0.0/0
+
+  ######
+
+Outputs:
+
+  VPC:
+    Description: 2 AZs VPC
+    Value: !Ref VPC
+
+  SubnetsPrivate:
+    Description: Private subnets
+    Value: !Join [',', [!Ref SubnetAPrivate, !Ref SubnetZPrivate]]

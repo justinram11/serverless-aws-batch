@@ -1,0 +1,13 @@
+{
+  "name": "serverless-aws-batch-e2e-test",
+  "version": "1.0.0",
+  "description": "serverless-aws-batch e2e test",
+  "main": "index.js",
+  "author": "Carlos Juega",
+  "license": "MIT",
+  "private": true,
+  "devDependencies": {
+    "serverless": "^2.72.2",
+    "serverless-aws-batch": "file:../../"
+  }
+}

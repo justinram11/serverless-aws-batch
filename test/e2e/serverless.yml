@@ -1,0 +1,36 @@
+service: serverless-aws-batch-e2e-test
+
+provider:
+  name: aws
+  region: ${env:AWS_REGION, 'eu-west-1'}
+  profile: ${env:AWS_PROFILE}
+  runtime: nodejs12.x
+  batch:
+    Type: EC2
+    SecurityGroupIds:
+      - !Ref AccessToVPCEndpointsSecurityGroup
+    Subnets:
+      - !Ref SubnetAPrivate
+      - !Ref SubnetZPrivate
+
+plugins:
+  - serverless-aws-batch
+
+resources:
+  - ${file(resources/vpc-2AZs.yml)}
+  - ${file(resources/aws-batch-no-public-subnets.yml)}
+
+functions:
+  hello:
+    handler: handler.hello
+    batch:
+      ContainerProperties:
+        Memory: 2048 # Optional. Default 2048
+        Vcpus: 1 # Optional. Default 1
+        # JobRoleArn: <ARN> # Optional. Defaults to package.iamRoleStatements
+        Environment:
+          TEST_ENV_1: Test Value 1
+      RetryStrategy:
+        Attempts: 1 # Optional. Defaults to 1
+      Timeout:
+        AttemptDurationSeconds: 300 # Optional. Defaults to 300

@@ -1,0 +1,105 @@
+Resources:
+
+  AccessToVPCEndpointsSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: serverless-aws-batch-e2e-test AccessToVPCEndpointsSecurityGroup
+      VpcId: !Ref VPC
+
+  VPCEndpointsSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: serverless-aws-batch-e2e-test VPCEndpointsSecurityGroup
+      SecurityGroupIngress:
+        -
+          IpProtocol: -1
+          SourceSecurityGroupId: !Ref AccessToVPCEndpointsSecurityGroup
+      VpcId: !Ref VPC
+
+  VPCEndpointToECRapi:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      PrivateDnsEnabled: true
+      SecurityGroupIds:
+        - !Ref VPCEndpointsSecurityGroup
+      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.ecr.api'
+      SubnetIds:
+        - !Ref SubnetAPrivate
+        - !Ref SubnetZPrivate
+      VpcEndpointType: Interface
+      VpcId: !Ref VPC
+
+  VPCEndpointToECRdkr:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      PrivateDnsEnabled: true
+      SecurityGroupIds:
+        - !Ref VPCEndpointsSecurityGroup
+      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.ecr.dkr'
+      SubnetIds:
+        - !Ref SubnetAPrivate
+        - !Ref SubnetZPrivate
+      VpcEndpointType: Interface
+      VpcId: !Ref VPC
+
+  VPCEndpointToECS:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      PrivateDnsEnabled: true
+      SecurityGroupIds:
+        - !Ref VPCEndpointsSecurityGroup
+      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.ecs'
+      SubnetIds:
+        - !Ref SubnetAPrivate
+        - !Ref SubnetZPrivate
+      VpcEndpointType: Interface
+      VpcId: !Ref VPC
+
+  VPCEndpointToECSagent:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      PrivateDnsEnabled: true
+      SecurityGroupIds:
+        - !Ref VPCEndpointsSecurityGroup
+      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.ecs-agent'
+      SubnetIds:
+        - !Ref SubnetAPrivate
+        - !Ref SubnetZPrivate
+      VpcEndpointType: Interface
+      VpcId: !Ref VPC
+
+  VPCEndpointToECStelemetry:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      PrivateDnsEnabled: true
+      SecurityGroupIds:
+        - !Ref VPCEndpointsSecurityGroup
+      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.ecs-telemetry'
+      SubnetIds:
+        - !Ref SubnetAPrivate
+        - !Ref SubnetZPrivate
+      VpcEndpointType: Interface
+      VpcId: !Ref VPC
+
+  VPCEndpointToCloudWatchLogs:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      PrivateDnsEnabled: true
+      SecurityGroupIds:
+        - !Ref VPCEndpointsSecurityGroup
+      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.logs'
+      SubnetIds:
+        - !Ref SubnetAPrivate
+        - !Ref SubnetZPrivate
+      VpcEndpointType: Interface
+      VpcId: !Ref VPC
+
+  VPCEndpointToS3:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      RouteTableIds:
+        - !Ref RouteTableAPrivate
+        - !Ref RouteTableZPrivate
+      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.s3'
+      VpcEndpointType: Gateway
+      VpcId: !Ref VPC
