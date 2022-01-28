@@ -10,6 +10,10 @@ const _ = require('lodash');
 
 class ServerlessAWSBatch {
     constructor(serverless, options) {
+        this.serverless = serverless;
+        this.options = options;
+        this.provider = this.serverless.getProvider('aws');
+
         serverless.configSchemaHandler.defineFunctionProperties('batch', {
             properties: {
                 ContainerProperties: {
@@ -17,7 +21,7 @@ class ServerlessAWSBatch {
                     properties: {
                         Memory: { type: 'number' },
                         Vcpus: { type: 'number' },
-                        Command: { type: 'string' },
+                        Command: { type: 'array', items: { type: 'string' } },
                         JobRoleArn: { type: 'string' },
                         Environment: { type: 'object' },
                     },
@@ -32,10 +36,6 @@ class ServerlessAWSBatch {
                 },
             },
         });
-
-        this.serverless = serverless;
-        this.options = options;
-        this.provider = this.serverless.getProvider('aws');
 
         // Make sure that we add the names for our ECR, docker, and batch resources to the provider
         _.merge(this.provider.naming, {
@@ -59,15 +59,15 @@ class ServerlessAWSBatch {
         this.commands = {};
 
         this.hooks = {
-            'after:package:initialize': () => generateCoreTemplate.generateCoreTemplate(),
+            'after:package:initialize': () => generateCoreTemplate.generateCoreTemplate.bind(this)(),
             'before:package:compileFunctions': async () => {
-                await batchenvironment.validateAWSBatchServerlessConfig();
-                await batchenvironment.generateAWSBatchTemplate();
-                await batchtask.compileBatchTasks();
+                await batchenvironment.validateAWSBatchServerlessConfig.bind(this)();
+                await batchenvironment.generateAWSBatchTemplate.bind(this)();
+                await batchtask.compileBatchTasks.bind(this)();
             },
-            'after:package:createDeploymentArtifacts': () => docker.buildDockerImage(),
-            'after:aws:deploy:deploy:updateStack': () => docker.pushDockerImageToECR(),
-            'before:remove:remove': () => awscli.deleteAllDockerImagesInECR(),
+            'after:package:createDeploymentArtifacts': () => docker.buildDockerImage.bind(this)(),
+            'after:aws:deploy:deploy:updateStack': () => docker.pushDockerImageToECR.bind(this)(),
+            'before:remove:remove': () => awscli.deleteAllDockerImagesInECR.bind(this)(),
         };
     }
 }
