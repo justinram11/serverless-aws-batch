@@ -1,7 +1,5 @@
 'use strict';
 
-const BbPromise = require('bluebird');
-const fse = require('fs-extra');
 const generateCoreTemplate = require('./lib/generateCoreTemplate');
 const ecr = require('./lib/ecr');
 const docker = require('./lib/docker');
@@ -10,10 +8,31 @@ const batchtask = require('./lib/batchtask');
 const awscli = require('./lib/awscli');
 const _ = require('lodash');
 
-BbPromise.promisifyAll(fse);
-
 class ServerlessAWSBatch {
   constructor(serverless, options) {
+    serverless.configSchemaHandler.defineFunctionProperties("batch", {
+      properties: {
+        ContainerProperties: {
+          type: "object",
+          properties: {
+            Memory: { type: "number" },
+            Vcpus: { type: "number" },
+            Command: { type: "string" },
+            JobRoleArn: { type: "string" },
+            Environment: { type: "object" },
+          },
+        },
+        RetryStrategy: {
+          type: "object",
+          properties: { Attempts: { type: "number" } },
+        },
+        Timeout: {
+          type: "object",
+          properties: { AttemptDurationSeconds: { type: "number" } },
+        },
+      },
+    });
+
     this.serverless = serverless;
     this.options = options;
     this.provider = this.serverless.getProvider('aws');
@@ -43,22 +62,15 @@ class ServerlessAWSBatch {
     this.commands = {}
 
     this.hooks = {
-      'after:package:initialize': () => BbPromise.bind(this)
-        .then(generateCoreTemplate.generateCoreTemplate),
-
-      'before:package:compileFunctions': () => BbPromise.bind(this)
-        .then(batchenvironment.validateAWSBatchServerlessConfig)
-        .then(batchenvironment.generateAWSBatchTemplate)
-        .then(batchtask.compileBatchTasks),
-
-      'after:package:createDeploymentArtifacts': () => BbPromise.bind(this)
-        .then(docker.buildDockerImage),
-
-      'after:aws:deploy:deploy:updateStack': () => BbPromise.bind(this)
-        .then(docker.pushDockerImageToECR),
-
-      'before:remove:remove': () => BbPromise.bind(this)
-        .then(awscli.deleteAllDockerImagesInECR)
+      'after:package:initialize': () => generateCoreTemplate.generateCoreTemplate(),
+      'before:package:compileFunctions': async () => {
+        await batchenvironment.validateAWSBatchServerlessConfig();
+        await batchenvironment.generateAWSBatchTemplate();
+        await batchtask.compileBatchTasks();
+      },
+      'after:package:createDeploymentArtifacts': () => docker.buildDockerImage(),
+      'after:aws:deploy:deploy:updateStack': () => docker.pushDockerImageToECR(),
+      'before:remove:remove': () => awscli.deleteAllDockerImagesInECR()
     }
   }
 }
