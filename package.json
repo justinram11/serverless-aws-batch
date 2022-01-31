@@ -14,6 +14,7 @@
     "serverless",
     "aws",
     "batch",
+    "nodejs",
     "python"
   ],
   "author": "Justin Ramsey",

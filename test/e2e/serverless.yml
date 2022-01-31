@@ -4,7 +4,7 @@ provider:
   name: aws
   region: ${env:AWS_REGION, 'eu-west-1'}
   profile: ${env:AWS_PROFILE}
-  runtime: nodejs12.x
+  runtime: nodejs14.x
   batch:
     Type: EC2
     SecurityGroupIds:
