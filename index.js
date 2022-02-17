@@ -51,6 +51,10 @@ class ServerlessAWSBatch {
         .then(batchenvironment.generateAWSBatchTemplate)
         .then(batchtask.compileBatchTasks),
 
+    'after:aws:common:moveArtifactsToPackage:move': () => BbPromise.bind(this)
+        .then((e) => {
+            console.log("after:aws:common:moveArtifactsToPackage:move:", e );
+        }),
       'after:package:createDeploymentArtifacts': () => BbPromise.bind(this)
         .then(docker.buildDockerImage),
 
