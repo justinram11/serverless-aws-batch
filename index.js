@@ -14,6 +14,8 @@ class ServerlessAWSBatch {
         this.options = options;
         this.provider = this.serverless.getProvider('aws');
 
+        this.areThereBatchFunctions = this.checkBatchFunctions();
+
         serverless.configSchemaHandler.defineFunctionProperties('batch', {
             properties: {
                 ContainerProperties: {
@@ -58,17 +60,35 @@ class ServerlessAWSBatch {
         // Define inner lifecycles
         this.commands = {};
 
-        this.hooks = {
-            'after:package:initialize': () => generateCoreTemplate.generateCoreTemplate.bind(this)(),
-            'before:package:compileFunctions': async () => {
-                await batchenvironment.validateAWSBatchServerlessConfig.bind(this)();
-                await batchenvironment.generateAWSBatchTemplate.bind(this)();
-                await batchtask.compileBatchTasks.bind(this)();
-            },
-            'after:package:createDeploymentArtifacts': () => docker.buildDockerImage.bind(this)(),
-            'after:aws:deploy:deploy:updateStack': () => docker.pushDockerImageToECR.bind(this)(),
-            'before:remove:remove': () => awscli.deleteAllDockerImagesInECR.bind(this)(),
-        };
+        if (this.areThereBatchFunctions) {
+            this.hooks = {
+                'after:package:initialize': () => generateCoreTemplate.generateCoreTemplate.bind(this)(),
+                'before:package:compileFunctions': async () => {
+                    await batchenvironment.validateAWSBatchServerlessConfig.bind(this)();
+                    await batchenvironment.generateAWSBatchTemplate.bind(this)();
+                    await batchtask.compileBatchTasks.bind(this)();
+                },
+                'after:package:createDeploymentArtifacts': () => docker.buildDockerImage.bind(this)(),
+                'after:aws:deploy:deploy:updateStack': () => docker.pushDockerImageToECR.bind(this)(),
+                'before:remove:remove': () => awscli.deleteAllDockerImagesInECR.bind(this)(),
+            };
+        } else {
+            this.hooks = { 'before:remove:remove': () => awscli.deleteAllDockerImagesInECR.bind(this)() };
+        }
+    }
+
+    checkBatchFunctions() {
+        const allFunctions = this.serverless.service.getAllFunctions();
+
+        return allFunctions.reduce((areThereBatchFunctions, functionName) => {
+            if (areThereBatchFunctions) {
+                return true;
+            }
+
+            const functionObject = this.serverless.service.getFunction(functionName);
+
+            return functionObject.hasOwnProperty('batch');
+        }, false);
     }
 }
 
