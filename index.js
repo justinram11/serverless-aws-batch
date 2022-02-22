@@ -8,14 +8,40 @@ const batchtask = require('./lib/batchtask');
 const awscli = require('./lib/awscli');
 const _ = require('lodash');
 
+function isBatchFunction(functionName) {
+    const functionObject = this.serverless.service.getFunction(functionName);
+
+    return functionObject.hasOwnProperty('batch');
+}
+
+function isIndividuallyPacked(functionName) {
+    if (this.serverless.service.package.individually) {
+        return true;
+    }
+
+    const functionObject = this.serverless.service.getFunction(functionName);
+
+    return !!_.get(functionObject, 'package.individually');
+}
+
+function getBatchFunctions() {
+    return this.serverless.service.getAllFunctions().filter((functionName) => isBatchFunction.bind(this)(functionName));
+}
+
+function getBatchFunctionsPackedIndividually() {
+    return getBatchFunctions
+        .bind(this)()
+        .filter((functionName) => isIndividuallyPacked.bind(this)(functionName));
+}
+
 class ServerlessAWSBatch {
     constructor(serverless, options) {
         this.serverless = serverless;
         this.options = options;
         this.provider = this.serverless.getProvider('aws');
 
-        this.areThereBatchFunctions = this.checkBatchFunctions();
-        this.areMultipleRepositories = this.checkPackageIndividuallyFlag();
+        this.batchFunctions = getBatchFunctions.bind(this)();
+        this.batchFunctionsPackedIndividually = getBatchFunctionsPackedIndividually.bind(this)();
 
         serverless.configSchemaHandler.defineFunctionProperties('batch', {
             properties: {
@@ -45,7 +71,7 @@ class ServerlessAWSBatch {
             getECRLogicalId: ecr.getECRLogicalId,
             getECRRepositoryName: ecr.getECRRepositoryName,
             getECRRepositoryURL: ecr.getECRRepositoryURL,
-            getDockerImageName: docker.getDockerImageName,
+            getDockerImageName: docker.getDockerImageName.bind(this),
             getBatchServiceRoleLogicalId: batchenvironment.getBatchServiceRoleLogicalId,
             getBatchInstanceManagementRoleLogicalId: batchenvironment.getBatchInstanceManagementRoleLogicalId,
             getBatchInstanceManagementProfileLogicalId: batchenvironment.getBatchInstanceManagementProfileLogicalId,
@@ -62,7 +88,9 @@ class ServerlessAWSBatch {
         // Define inner lifecycles
         this.commands = {};
 
-        if (this.areThereBatchFunctions) {
+        const areThereBatchFunctions = this.batchFunctions.length > 0;
+
+        if (areThereBatchFunctions) {
             this.hooks = {
                 'after:package:initialize': () => generateCoreTemplate.generateCoreTemplate.bind(this)(),
                 'before:package:compileFunctions': async () => {
@@ -71,47 +99,12 @@ class ServerlessAWSBatch {
                     await batchtask.compileBatchTasks.bind(this)();
                     await docker.buildDockerImages.bind(this)();
                 },
-                'after:aws:deploy:deploy:updateStack': () => docker.pushDockerImageToECR.bind(this)(),
+                'after:aws:deploy:deploy:updateStack': () => docker.pushDockerImagesToECR.bind(this)(),
                 'before:remove:remove': () => awscli.deleteAllDockerImagesInECR.bind(this)(),
             };
         } else {
             this.hooks = { 'before:remove:remove': () => awscli.deleteAllDockerImagesInECR.bind(this)() };
         }
-    }
-
-    checkBatchFunctions() {
-        return this.serverless.service
-            .getAllFunctions()
-            .reduce((areThereBatchFunctions, functionName) => areThereBatchFunctions || this.isBatchFunction(functionName), false);
-    }
-
-    checkPackageIndividuallyFlag() {
-        return this.serverless.service
-            .getAllFunctions()
-            .reduce(
-                (individuallyPackaged, functionName) => individuallyPackaged || this.isBatchFunctionAndIndividuallyPackaged(functionName),
-                false
-            );
-    }
-
-    isBatchFunction(functionName) {
-        const functionObject = this.serverless.service.getFunction(functionName);
-
-        return functionObject.hasOwnProperty('batch');
-    }
-
-    isIndividuallyPackaged(functionName) {
-        if (this.serverless.service.package.individually) {
-            return true;
-        }
-
-        const functionObject = this.serverless.service.getFunction(functionName);
-
-        return !!_.get(functionObject, 'package.individually');
-    }
-
-    isBatchFunctionAndIndividuallyPackaged(functionName) {
-        return this.isBatchFunction(functionName) && this.isIndividuallyPackaged(functionName);
     }
 }
 
