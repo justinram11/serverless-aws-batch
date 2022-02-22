@@ -1,12 +1,13 @@
 # Serverless Batch
+
 [![serverless](http://public.serverless.com/badges/v3.svg)](http://www.serverless.com)
 
-A Serverless v1.x plugin that makes creating and running AWS Batch tasks as easy as creating a Serverless Lambda Function.
+A Serverless plugin that makes creating and running AWS Batch tasks as easy as creating a Serverless Lambda Function.
 
 Tested with:
-* Serverless >= v1.43
-* Python 3.7
-* Node.JS 10
+* Serverless >= v2.72
+* Python >= v3.7
+* Node.JS >= v12
 
 **Disclaimer: This project has not yet been well tested and is not yet recommended for a production system**
 
@@ -128,6 +129,7 @@ The lambda function will automatically create a new AWS Batch Job which should b
 Logs are visible in CloudWatch under the [/aws/batch/job](https://us-east-2.console.aws.amazon.com/cloudwatch/home?region=us-east-2#logStream:group=/aws/batch/job;streamFilter=typeLogStreamPrefix) Log Group
 
 `serverless.yml`
+
 ```yaml
 service: serverless-demo
 
@@ -307,6 +309,7 @@ resources:
 ### Python
 
 `handler.py`
+
 ```python3
 import json
 import time
@@ -335,6 +338,7 @@ def hello(event, context):
 ### Node.JS
 
 `handler.js`
+
 ```nodejs
 'use strict';
 const process = require("process");
@@ -360,3 +364,4 @@ module.exports.hello = (event, context, callback) => {
 * [gcaliene](https://github.com/gcaliene)
 * [MEGApixel23](https://github.com/MEGApixel23)
 * [claydanford](https://github.com/claydanford)
+* [cjuega](https://github.com/cjuega)
