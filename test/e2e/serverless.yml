@@ -16,12 +16,32 @@ provider:
 plugins:
   - serverless-aws-batch
 
+package:
+  individually: true
+
 resources:
   - ${file(resources/vpc-2AZs.yml)}
   - ${file(resources/aws-batch-no-public-subnets.yml)}
 
 functions:
   hello:
+    handler: handler.hello
+    batch:
+      ContainerProperties:
+        Memory: 2048 # Optional. Default 2048
+        Vcpus: 1 # Optional. Default 1
+        # JobRoleArn: <ARN> # Optional. Defaults to package.iamRoleStatements
+        Environment:
+          TEST_ENV_1: Test Value 1
+      RetryStrategy:
+        Attempts: 1 # Optional. Defaults to 1
+      Timeout:
+        AttemptDurationSeconds: 300 # Optional. Defaults to 300
+
+  hello2:
+    handler: handler.hello
+
+  hello3:
     handler: handler.hello
     batch:
       ContainerProperties:
