@@ -15,6 +15,7 @@ class ServerlessAWSBatch {
         this.provider = this.serverless.getProvider('aws');
 
         this.areThereBatchFunctions = this.checkBatchFunctions();
+        this.areMultipleRepositories = this.checkPackageIndividuallyFlag();
 
         serverless.configSchemaHandler.defineFunctionProperties('batch', {
             properties: {
@@ -51,6 +52,7 @@ class ServerlessAWSBatch {
             getBatchSpotFleetManagementRoleLogicalId: batchenvironment.getBatchSpotFleetManagementRoleLogicalId,
             getBatchJobExecutionRoleLogicalId: batchtask.getBatchJobExecutionRoleLogicalId,
             getLambdaScheduleExecutionRoleLogicalId: batchenvironment.getLambdaScheduleExecutionRoleLogicalId,
+            getLambdaScheduleArtifactName: batchenvironment.getLambdaScheduleArtifactName,
             getBatchComputeEnvironmentLogicalId: batchenvironment.getBatchComputeEnvironmentLogicalId,
             getBatchJobQueueLogicalId: batchenvironment.getBatchJobQueueLogicalId,
             getBatchJobQueueName: batchenvironment.getBatchJobQueueName,
@@ -67,8 +69,8 @@ class ServerlessAWSBatch {
                     await batchenvironment.validateAWSBatchServerlessConfig.bind(this)();
                     await batchenvironment.generateAWSBatchTemplate.bind(this)();
                     await batchtask.compileBatchTasks.bind(this)();
+                    await docker.buildDockerImages.bind(this)();
                 },
-                'after:package:createDeploymentArtifacts': () => docker.buildDockerImage.bind(this)(),
                 'after:aws:deploy:deploy:updateStack': () => docker.pushDockerImageToECR.bind(this)(),
                 'before:remove:remove': () => awscli.deleteAllDockerImagesInECR.bind(this)(),
             };
@@ -78,17 +80,38 @@ class ServerlessAWSBatch {
     }
 
     checkBatchFunctions() {
-        const allFunctions = this.serverless.service.getAllFunctions();
+        return this.serverless.service
+            .getAllFunctions()
+            .reduce((areThereBatchFunctions, functionName) => areThereBatchFunctions || this.isBatchFunction(functionName), false);
+    }
 
-        return allFunctions.reduce((areThereBatchFunctions, functionName) => {
-            if (areThereBatchFunctions) {
-                return true;
-            }
+    checkPackageIndividuallyFlag() {
+        return this.serverless.service
+            .getAllFunctions()
+            .reduce(
+                (individuallyPackaged, functionName) => individuallyPackaged || this.isBatchFunctionAndIndividuallyPackaged(functionName),
+                false
+            );
+    }
 
-            const functionObject = this.serverless.service.getFunction(functionName);
+    isBatchFunction(functionName) {
+        const functionObject = this.serverless.service.getFunction(functionName);
 
-            return functionObject.hasOwnProperty('batch');
-        }, false);
+        return functionObject.hasOwnProperty('batch');
+    }
+
+    isIndividuallyPackaged(functionName) {
+        if (this.serverless.service.package.individually) {
+            return true;
+        }
+
+        const functionObject = this.serverless.service.getFunction(functionName);
+
+        return !!_.get(functionObject, 'package.individually');
+    }
+
+    isBatchFunctionAndIndividuallyPackaged(functionName) {
+        return this.isBatchFunction(functionName) && this.isIndividuallyPackaged(functionName);
     }
 }
 
