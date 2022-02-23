@@ -93,6 +93,7 @@ class ServerlessAWSBatch {
         if (areThereBatchFunctions) {
             this.hooks = {
                 'after:package:initialize': () => generateCoreTemplate.generateCoreTemplate.bind(this)(),
+                'after:package:createDeploymentArtifacts': () => docker.copyEntrypointScript.bind(this)(),
                 'before:package:compileFunctions': async () => {
                     await batchenvironment.validateAWSBatchServerlessConfig.bind(this)();
                     await batchenvironment.generateAWSBatchTemplate.bind(this)();
