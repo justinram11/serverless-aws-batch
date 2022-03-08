@@ -1,6 +1,6 @@
 {
   "name": "serverless-aws-batch",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Serverless Framework Plugin for interacting with AWS Batch",
   "main": "index.js",
   "scripts": {
