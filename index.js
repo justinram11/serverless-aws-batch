@@ -43,25 +43,39 @@ class ServerlessAWSBatch {
         this.batchFunctions = getBatchFunctions.bind(this)();
         this.batchFunctionsPackedIndividually = getBatchFunctionsPackedIndividually.bind(this)();
 
-        serverless.configSchemaHandler.defineFunctionProperties('batch', {
+        serverless.configSchemaHandler.defineTopLevelProperty('batch', {
+            type: 'object',
             properties: {
-                ContainerProperties: {
+                Type: { type: 'string' },
+                SecurityGroupIds: { type: 'array', items: { type: 'string' } },
+                Subnets: { type: 'array', items: { type: 'string' } },
+            },
+        });
+
+        serverless.configSchemaHandler.defineFunctionProperties('aws', {
+            properties: {
+                batch: {
                     type: 'object',
                     properties: {
-                        Memory: { type: 'number' },
-                        Vcpus: { type: 'number' },
-                        Command: { type: 'array', items: { type: 'string' } },
-                        JobRoleArn: { type: 'string' },
-                        Environment: { type: 'object' },
+                        ContainerProperties: {
+                            type: 'object',
+                            properties: {
+                                Memory: { type: 'number' },
+                                Vcpus: { type: 'number' },
+                                Command: { type: 'array', items: { type: 'string' } },
+                                JobRoleArn: { type: 'string' },
+                                Environment: { type: 'object' },
+                            },
+                        },
+                        RetryStrategy: {
+                            type: 'object',
+                            properties: { Attempts: { type: 'number' } },
+                        },
+                        Timeout: {
+                            type: 'object',
+                            properties: { AttemptDurationSeconds: { type: 'number' } },
+                        },
                     },
-                },
-                RetryStrategy: {
-                    type: 'object',
-                    properties: { Attempts: { type: 'number' } },
-                },
-                Timeout: {
-                    type: 'object',
-                    properties: { AttemptDurationSeconds: { type: 'number' } },
                 },
             },
         });
