@@ -7,7 +7,7 @@
   "license": "MIT",
   "private": true,
   "devDependencies": {
-    "serverless": "^2.72.2",
+    "serverless": "^3.22.0",
     "serverless-aws-batch": "file:../../"
   }
 }
