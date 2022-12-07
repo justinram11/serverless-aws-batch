@@ -28,7 +28,7 @@
     "fs-extra": "^7.0.1",
     "jszip": "^3.4.0",
     "lodash": "^4.17.13",
-    "serverless": "^1.70.0"
+    "serverless": "^3.25.1"
   },
   "devDependencies": {
     "aws-sdk": "^2.672.0"
